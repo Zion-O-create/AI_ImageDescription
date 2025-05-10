@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Description AI</title>
+    <style>
+        body {
+            background-color: black;
+            font-family: monospace;
+            text-align: center;
+            margin: 20px;
+        }
+        #preview img {
+            outline: auto;
+            outline-style: double;
+            outline-color: gold;
+            display: flex;
+            max-width: 300px;
+            margin: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        #output {
+            outline: auto;
+            outline-color: gold;
+            outline-style: double;
+            display: flex;
+            color: gold;
+            background-color: black;
+            padding: 8px;
+            border: 3px;
+            font-size: 18px;
+            font-family: monospace;
+            margin-top: 20px;
+        }
+
+        h2, h3, button, #imageInput{
+            color: gold;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Upload an Image to Get a Description</h2>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="preview"></div>
+    <button onclick="uploadImage()">Generate Description</button>
+    
+    <h3>Result:</h3>
+    <p id="output">Waiting for input...</p>
+
+    <script>
+        function uploadImage() {
+            let input = document.getElementById('imageInput');
+            let file = input.files[0];
+
+            if (!file) {
+                alert("Please select an image.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", file);
+
+            document.getElementById("output").innerText = "Processing...";
+
+            fetch("http://127.0.0.1:8000/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output").innerText = data.description;
+            })
+            .catch(error => {
+                document.getElementById("output").innerText = "Error processing the image.";
+                console.error("Error:", error);
+            });
+        }
+
+        document.getElementById("imageInput").addEventListener("change", function(event) {
+            let reader = new FileReader();
+            reader.onload = function() {
+                let img = document.createElement("img");
+                img.src = reader.result;
+                let preview = document.getElementById("preview");
+                preview.innerHTML = "";
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+    </script>
+
+</body>
+</html>
